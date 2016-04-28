@@ -231,7 +231,6 @@ if __name__ == '__main__':
 			while True:
 				data = dhcps.recv(1024)
 				requestPkt = DHCPRequest(discoverPkt.xid,data,offerPkt.serverIP)
-				print(requestPkt.isRecv)
 				if requestPkt.isRecv == 1:
 					break
 					
