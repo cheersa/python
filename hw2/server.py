@@ -129,7 +129,7 @@ class User:
 		
 def parse_command(str,account,user):
 	cmd = str.split(" ")
-	standard_cmd=["friend","send","sendfile"]
+	standard_cmd=["friend","send","sendfile","talk"]
 	try:
 		if not cmd[0] in standard_cmd:
 			return "command error"
@@ -151,6 +151,11 @@ def parse_command(str,account,user):
 			if user.check_user(cmd[1]) and account!=cmd[1]:
 				user.set_file_record(account,cmd[1],cmd[2])
 				return cmd
+			else:
+				return False
+		elif cmd[0] == "talk" and cmd[1]:
+			if user.check_user(cmd[1]) and account!=cmd[1]:
+				return (cmd[0],user.get_conn(cmd[1]))
 			else:
 				return False
 	except IndexError as e:
@@ -218,7 +223,16 @@ def subThreadIn(conn,user):
 				elif msg == "command error":
 					conn.send(msg.encode())
 					continue
-				if 'sendfile' in data and msg:
+				if 'talk' in msg and len(msg)==2:
+					conns = msg[1]
+					while True and conns:
+						msg = conn.recv(1024).decode()
+						if msg == 'q':
+							break
+						msg = "%s:%s" %(account,msg)
+						conns.send(msg.encode())
+						
+				elif 'sendfile' in data and msg:
 					dir = "server_recv/"
 					recv_name = msg[1]
 					file_name = msg[2]

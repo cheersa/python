@@ -27,7 +27,17 @@ def sendThreadFunc():
 				sock.send(message.encode())
 				is_close = True
 				break
-			if message == 'y' or message == "Y":
+			elif "talk" in message:
+				sock.send(message.encode())
+				tmp = message.split(" ")
+				name = tmp[1]
+				while True:
+					message = input("talk %s:" %(name))
+					sock.send(message.encode())
+					if message == 'q':
+						break
+					
+			elif message == 'y' or message == "Y":
 				if "info" in last_recv and "receive" in last_recv and "file" in last_recv:
 					tmp = last_recv.split(" ")
 					tmp2 = last_recv.split("file_name:")
@@ -37,7 +47,7 @@ def sendThreadFunc():
 				else:
 					sys.stdout.write("\command error\n>")
 					sys.stdout.flush()
-			if "sendfile" in message:
+			elif "sendfile" in message:
 				cmd = message.split(" ")
 				
 				if len(cmd) != 3:
@@ -67,6 +77,9 @@ def sendThreadFunc():
 		except ConnectionResetError:  
 			print('Server is closed!')
 			break
+		except IndexError:  
+			print("Command error")
+			continue
 	print("bye")
 	sock.close()
 	  
