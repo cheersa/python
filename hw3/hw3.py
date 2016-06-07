@@ -9,11 +9,13 @@ from lxml import etree
 import re
 mail={}
 error =0
+error_list=[]
 def GET(url):
-	global mail,error
+	global mail,error,error_list
 	response = requests.get(url)
 	if response.headers.get('Content-Type', '').split(';')[0] != 'text/html':
 		error+=1
+		error_list.append(url)
 		return
 	text = response.text
 	try:
@@ -21,6 +23,8 @@ def GET(url):
 	except Exception as e:
 		print('    {}: {}'.format(e.__class__.__name__, e))
 		return
+	except XMLSyntaxError as e:
+		print(e)
 	links = html.findall('.//a[@href]')
 	if not url in mail:
 		mail[url]=[]
@@ -51,7 +55,7 @@ def scrape(start, url_filter):
 		if run>=20:
 			break
 def main(GET):
-	global mail,error
+	global mail,error,error_list
 	parser = argparse.ArgumentParser(description='Scrape a simple site.')
 	parser.add_argument('url', help='the URL at which to begin')
 	start_url = parser.parse_args().url
@@ -60,6 +64,9 @@ def main(GET):
 	scrape((GET, start_url), url_filter)
 	print ("\n\nresult--------------------------------\nerror:%d" %(error))
 	count = 1;
+	for url in error_list:
+		print(url)
+	print("\n")
 	for url in mail:
 		print("[%d]url:%s" %(count,url))
 		data = mail[url][0]
